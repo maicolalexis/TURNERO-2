@@ -7,4 +7,5 @@ class Database {
         $db   = "hospital";
         return new mysqli($host, $user, $pass, $db);
     }
+    
 }

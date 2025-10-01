@@ -1,0 +1,27 @@
+[
+    {
+        "categoria": "citamedicap",
+        "turno": 12,
+        "ventanilla": "ventanilla1"
+    },
+    {
+        "categoria": "facturacion",
+        "turno": 1,
+        "ventanilla": "ventanilla1"
+    },
+    {
+        "categoria": "facturacionp",
+        "turno": 2,
+        "ventanilla": "ventanilla1"
+    },
+    {
+        "categoria": "facturacion",
+        "turno": 3,
+        "ventanilla": "ventanilla1"
+    },
+    {
+        "categoria": "facturacionp",
+        "turno": 4,
+        "ventanilla": "ventanilla1"
+    }
+]

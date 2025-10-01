@@ -92,21 +92,22 @@ function enviarDatoDelTurno(categoria) {
   });
 }
 var contador = 0;
-$("#llamarTurno").submit(function(e) {   
+$("#llamarTurno").submit(function (e) {
   e.preventDefault();
-  if(contador == 2){
+  let ventanilla = $("#ventanilla").val();
+  if (contador == 2) {
     contador = 0;
-  }else{
+  } else {
     contador++;
   }
-  let cont = {
-    "contador": contador
+  let datos = {
+    "contador": contador,
+    "ventanilla": ventanilla,
   };
-  console.log(contador)
   $.ajax({
     url: "../Controllers/SolicitarTurnoController.php?accion=llamarTurno",
     type: "POST",
-    data: cont,
+    data: datos ,
     dataType: "json",
     success: function (res) {
       if (res.status === "ok") {
@@ -114,14 +115,114 @@ $("#llamarTurno").submit(function(e) {
           `<p class='text-blue-600 font-bold'>${res.msg}</p>
            <p>Categoría: ${res.data.categoria}</p>
            <p>Turno: ${res.data.turno}</p>`
-           
+
         );
       } else {
         $("#respuesta").html(`<p class='text-red-600'>${res.msg}</p>`);
       }
-    },error: function(xhr, status, error) {
+    }, error: function (xhr, status, error) {
       console.error("Error AJAX:", status, error);
       $("#respuesta").html("<p class='text-red-600'>Error en la petición</p>");
     }
   });
 });
+// llamar la funcion para que aparezca el select en turnospendientes
+$(document).ready(function () {
+  if ($("#turnosPage").length) {
+    cargarUsuarios();
+  }
+
+});
+/**
+ * Función para cargar usuarios desde el controlador
+ */
+function cargarUsuarios() {
+
+  $.ajax({
+    url: "../Controllers/UsuarioController.php", // el controlador que llama al modelo
+    type: "POST", // usamos POST como pediste
+    data: { "action": "listar" },
+    dataType: "json",
+    success: function (res) {
+
+      if (res.status === "ok") {
+        let $select = $(".usuarioSelect");
+        $select.empty(); // limpiamos el select
+        $select.append('<option value="">Selecciona un usuario</option>');
+
+        // recorrer usuarios recibidos
+        res.data.forEach(function (ventanilla) {
+          $select.append(
+            `<option value="${ventanilla.ventanilla}">${ventanilla.ventanilla}</option>`
+          );
+        });
+      } else {
+        alert("No se encontraron usuarios.");
+      }
+    },
+    error: function (xhr, status, error) {
+      console.error("Error en la petición:", error);
+      alert("Error al cargar los usuarios.");
+    },
+  });
+}
+$(document).on("click", ".btnLlamar", function () {
+  let turno = $(this).data("turno"); // turno del botón
+  let usuario = $(this).closest("td").find(".usuarioSelect").val(); // usuario del select en la misma fila
+
+  if (!usuario) {
+    alert("Debes seleccionar un usuario antes de llamar un turno.");
+    return;
+  }
+
+  $.ajax({
+    url: "../Controllers/SolicitarTurnoController.php",
+    type: "POST",
+    dataType: "json",
+    data: {
+      "action": "llamarTurnoAdmin",
+      turno: turno,
+      usuario: usuario
+    },
+    success: function (res) {
+      if (res.status === "ok") {
+        mostrarAlerta("Éxito", res.msg, "success");
+      } else {
+        mostrarAlerta("Error", res.msg, "error");
+      }
+    },
+    error: function (xhr, status, error) {
+      mostrarAlerta("Error", "Error en la petición: " + error, "error");
+    }
+
+  });
+
+  function mostrarAlerta(titulo, mensaje, tipo = "info") {
+    let $modal = $("#alertaModal");
+    let $titulo = $("#alertaTitulo");
+    let $mensaje = $("#alertaMensaje");
+
+    // Cambiar colores según tipo
+    if (tipo === "success") {
+      $titulo.removeClass().addClass("text-lg font-bold mb-2 text-green-600");
+    } else if (tipo === "error") {
+      $titulo.removeClass().addClass("text-lg font-bold mb-2 text-red-600");
+    } else {
+      $titulo.removeClass().addClass("text-lg font-bold mb-2 text-blue-600");
+    }
+
+    $titulo.text(titulo);
+    $mensaje.text(mensaje);
+    $modal.removeClass("hidden");
+  }
+
+  // Cerrar alerta
+  $(document).on("click", "#cerrarAlerta", function () {
+  $("#alertaModal").addClass("hidden");
+
+  // Esperar 1 segundo y recargar
+  setTimeout(function () {
+    location.reload();
+  }, 30);
+});
+})

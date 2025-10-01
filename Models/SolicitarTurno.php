@@ -42,21 +42,52 @@ class SolicitarTurno
             "data" => $nuevo
         ]);
     }
+
+
+
+
+    //ESTA FUNCION FUE DISEÑADA PARA VERIFICAR LAS CATEGORIAS 
     public function categoria($ventanilla)
     {
-        
+        //SE LLAMA LA BASE DE DATOS
         $db = Database::getConexion();
+        // SE CREA EL SQL
+        $sql = "SELECT c.categoria1, c.categoria2
+        FROM ventanillas v
+        INNER JOIN categoria c ON v.id = c.id_ventanilla
+        WHERE v.ventanilla = ?
+    ";
+        //PREPARAMOS EL SQL
+        $stmt = $db->prepare($sql);
 
-        $stmt = $db->prepare("SELECT categoria FROM ventanillas WHERE ventanilla =? ");
+        //SE VERIFICA SI QUEDO BIEN
+        if (!$stmt) {
+            die("Error en prepare: " . $db->error);
+        }
         $stmt->bind_param("s", $ventanilla);
         $stmt->execute();
         $res = $stmt->get_result();
 
         if ($res->num_rows > 0) {
             $row = $res->fetch_assoc();
-            return $row['categoria']; // 👈 devolver string real
+            // HACEMOS UN ARRAY QUE ENVIE LA CATEGORIA1 Y CATEGORIA2
+            return [
+                "categoria1" => $row['categoria1'],
+                "categoria2" => $row['categoria2']
+            ];
         } else {
-            return "error";
+            return [];
         }
+    }
+    public static function llamarTurnoAdmin($turno, $usuario)
+    {
+        $db = Database::getConexion();
+
+        // Ejemplo: registrar el turno llamado
+        $sql = "INSERT INTO turnos_llamados (turno, usuario, fecha) VALUES (?, ?, NOW())";
+        $stmt = $db->prepare($sql);
+        $stmt->bind_param("is", $turno, $usuario);
+
+        return $stmt->execute();
     }
 }

@@ -30,7 +30,7 @@ if (!isset($_SESSION['ventanilla'])) {
         <div class="bg-white shadow-lg rounded-2xl p-8 w-full max-w-md text-center border border-blue-200">
             <h1 class="text-3x1">llamar turno</h1>
             <form action="#" method="post" id="llamarTurno" class="space-y-5" novalidate>
-                <input type="hidden" name="ventanilla" value="<?php echo $_SESSION['ventanilla']; ?>">
+                <input type="hidden" id="ventanilla" name="ventanilla" value="<?php echo $_SESSION['ventanilla'];?>">
                 <button type="submit" class="submit w-50 rounded-xl bg-blue-600 text-white font-medium py-2.5 shadow hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200 transition">llamar Turno</button>
                 
             </form>
